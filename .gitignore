@@ -1,0 +1,8 @@
+/coverage
+/node_modules
+/src/logs/
+/dist
+package-lock.json
+*.log
+*.env
+undefined
