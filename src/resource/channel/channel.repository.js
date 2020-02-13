@@ -3,7 +3,9 @@ import { Channel } from './channel.model';
 
 const findAll = async () => {
   try {
-    const data = await Channel.aggregate().match({ alias: { $ne: 'general' } });
+    const { CHANNEL_NAME_GENERAL } = process.env;
+
+    const data = await Channel.aggregate().match({ alias: { $ne: CHANNEL_NAME_GENERAL } });
 
     const cleanData = omitDeep(data, ['_id', '__v']);
     return cleanData;
@@ -45,4 +47,28 @@ const incrementUserAmount = async (id, number) => {
   }
 };
 
-export { findAll, findByAlias, register, remove, incrementUserAmount };
+const updateUsersTyping = async (id, userId) => {
+  try {
+    return Channel.update({ _id: id }, { $push: { usersTyping: userId } });
+  } catch (e) {
+    throw e;
+  }
+};
+
+const updateUsersStopTyping = async (id, userId) => {
+  try {
+    return Channel.update({ _id: id }, { $pull: { usersTyping: userId } });
+  } catch (e) {
+    throw e;
+  }
+};
+
+export {
+  findAll,
+  findByAlias,
+  register,
+  remove,
+  incrementUserAmount,
+  updateUsersStopTyping,
+  updateUsersTyping,
+};

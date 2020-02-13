@@ -7,101 +7,59 @@ const messageRouter = Router();
 
 /**
  * @swagger
- * /messages/channel/{channel}:
+ * /messages/channel/{aliasChannel}:
  *   get:
  *     summary: Retorna todos as messagens de um canal
- *     description: Retorna todos os usuários que estão nos chats
+ *     description: Retorna todas as menssagens a patir de uma data de criação
  *     security:
  *       - UserAuth: []
  *     tags:
  *       - Messages
  *     parameters:
- *       - name: channel
- *         description: Nome do canal
- *         in: path
- *         required: true
- *         type: string
- *       - name: limit
- *         description: Limite da quantidade de documentos por pagina
- *         in: query
- *         required: false
- *         type: string
- *       - name: page
- *         description: Pagina dos documentos
- *         in: query
- *         required: false
- *         type: string
- *     responses:
- *       200:
- *         description: list of all
- */
-messageRouter.get('/channel/:channel', authorized, messageController.getMessagesByChannel);
-
-/**
- * @swagger
- * /messages/channel/{channel}/{createdAt}:
- *   get:
- *     summary: Retorna todos as messagens de um canal
- *     description: Retorna todos os usuários que estão nos chats
- *     security:
- *       - UserAuth: []
- *     tags:
- *       - Messages
- *     parameters:
- *       - name: channel
+ *       - name: aliasChannel
  *         description: Nome do canal
  *         in: path
  *         required: true
  *         type: string
  *       - name: createdAt
- *         description: Nome do canal
- *         in: path
+ *         description: Data range
+ *         in: query
  *         required: true
  *         type: string
  *     responses:
  *       200:
  *         description: list of all
  */
-messageRouter.get('/channel/:channel/:createdAt', authorized, messageController.getMessages);
+messageRouter.get('/channel/:aliasChannel', authorized, messageController.getMessagesByChannel);
 
 /**
  * @swagger
- * /messages/user/{user}:
+ * /messages/user/{username}:
  *   get:
  *     summary: Retorna todos as messagens de um usuário
- *     description: Retorna todos os usuários que estão nos chats
+ *     description: Retorna as mesagens de usuário pelo seu username
  *     security:
  *       - UserAuth: []
  *     tags:
  *       - Messages
  *     parameters:
- *       - name: user
+ *       - name: username
  *         description: Nome do usuario
  *         in: path
  *         required: true
- *         type: string
- *       - name: limit
- *         description: Limite da quantidade de documentos por pagina
- *         in: query
- *         required: false
- *         type: string
- *       - name: page
- *         description: Pagina dos documentos
- *         in: query
- *         required: false
  *         type: string
  *     responses:
  *       200:
  *         description: list of all
  */
-messageRouter.get('/user/:user', authorized, messageController.getMessagesByUser);
+messageRouter.get('/user/:username', authorized, messageController.getMessagesByUser);
 
 /**
  * @swagger
  * /messages:
  *   post:
  *     summary: Insere uma mensagem no chat de conversas
- *     description: Insere um nova mensagem na base de dados
+ *     description: Insere um nova mensagem na base de dados com informações do usuário e do canal
  *     security:
  *       - UserAuth: []
  *     tags:
@@ -112,13 +70,13 @@ messageRouter.get('/user/:user', authorized, messageController.getMessagesByUser
  *         in: formData
  *         required: true
  *         type: string
- *       - name: user
- *         description: id.
+ *       - name: username
+ *         description: nome do usuário.
  *         in: formData
  *         required: true
  *         type: string
- *       - name: channel
- *         description: id
+ *       - name: aliasChannel
+ *         description: nome do canal
  *         in: formData
  *         required: true
  *         type: string

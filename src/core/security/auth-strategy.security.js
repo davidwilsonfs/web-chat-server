@@ -2,11 +2,6 @@ import httpStatus from 'http-status-codes';
 import TokenGenerator from './token-generator.security';
 import { globalErrorHandler } from '../exceptions/global.error';
 
-/**
- * @param {*} req
- * @param {*} res
- * @param {*} next
- */
 const authorized = (req, res, next) => {
   try {
     const token = req.body.token || req.query.token || req.headers.authorization;
@@ -29,11 +24,6 @@ const authorized = (req, res, next) => {
   }
 };
 
-/**
- * @param {*} req
- * @param {*} res
- * @param {*} next
- */
 const refreshToken = async (req, res, next) => {
   try {
     const token = req.headers.authorization || req.body.token;

@@ -1,44 +1,9 @@
 import omitDeep from 'omit-deep';
 import { Message } from './message.model';
 
-const getMessagesByChannel = async (channel, options) => {
+const getMessagesByChannel = async (channelAlias, createdAt) => {
   try {
-    const aggregate = Message.aggregate()
-      .lookup({
-        from: 'channels',
-        localField: 'channel',
-        foreignField: '_id',
-        as: 'channel',
-      })
-      .unwind('channel')
-      .match({ 'channel.alias': channel })
-      .sort({ created_at: 1 })
-      .lookup({
-        from: 'users',
-        localField: 'user',
-        foreignField: '_id',
-        as: 'user',
-      })
-      .unwind('user');
-
-    const { docs, totalPages, totalDocs, nextPage, prevPage } = await Message.aggregatePaginate(
-      aggregate,
-      options
-    );
-
-    const cleanData = omitDeep(docs, ['_id', '__v']);
-    return {
-      data: cleanData,
-      metadata: { totalPages, totalDocs, nextPage, prevPage },
-    };
-  } catch (e) {
-    throw e;
-  }
-};
-
-const getMessages = async (channel, createdAt) => {
-  try {
-    const aggregate = Message.aggregate()
+    const data = await Message.aggregate()
       .match({ created_at: { $gte: createdAt } })
       .lookup({
         from: 'channels',
@@ -47,7 +12,7 @@ const getMessages = async (channel, createdAt) => {
         as: 'channel',
       })
       .unwind('channel')
-      .match({ 'channel.alias': channel })
+      .match({ 'channel.alias': channelAlias })
       .sort({ created_at: 1 })
       .lookup({
         from: 'users',
@@ -57,16 +22,15 @@ const getMessages = async (channel, createdAt) => {
       })
       .unwind('user');
 
-    const data = await aggregate;
     return omitDeep(data, ['_id', '__v']);
   } catch (e) {
     throw e;
   }
 };
 
-const getMessagesByUser = async (user, options) => {
+const getMessagesByUser = async username => {
   try {
-    const aggregate = Message.aggregate()
+    const data = await Message.aggregate()
       .lookup({
         from: 'users',
         localField: 'user',
@@ -74,7 +38,7 @@ const getMessagesByUser = async (user, options) => {
         as: 'user',
       })
       .unwind('user')
-      .match({ 'user.username': user })
+      .match({ 'user.username': username })
       .sort({ created_at: -1 })
       .lookup({
         from: 'channels',
@@ -84,16 +48,7 @@ const getMessagesByUser = async (user, options) => {
       })
       .unwind('channel');
 
-    const { docs, totalPages, totalDocs, nextPage, prevPage } = await Message.aggregatePaginate(
-      aggregate,
-      options
-    );
-
-    const cleanData = omitDeep(docs, ['_id', '__v']);
-    return {
-      data: cleanData,
-      metadata: { totalPages, totalDocs, nextPage, prevPage },
-    };
+    return omitDeep(data, ['_id', '__v']);
   } catch (e) {
     throw e;
   }
@@ -108,4 +63,4 @@ const insert = async data => {
   }
 };
 
-export { getMessagesByChannel, getMessagesByUser, insert, getMessages };
+export { getMessagesByChannel, getMessagesByUser, insert };

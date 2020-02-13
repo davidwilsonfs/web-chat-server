@@ -4,20 +4,9 @@ import * as constants from './user.constants';
 import { validateError } from '../../core/exceptions';
 import TokenGenerator from '../../core/security/token-generator.security';
 
-const getAll = async (req, res, next) => {
+const getAllUsers = async (req, res, next) => {
   try {
-    validateError(req);
-
-    const { query } = req;
-
-    let { limit, page } = query;
-
-    limit = limit || 10;
-    page = page || 1;
-
-    const options = { limit, page };
-
-    const data = await userService.getAll(options);
+    const data = await userService.getAll();
 
     res.status(httpStatus.OK).json(data);
   } catch (e) {
@@ -38,7 +27,7 @@ const getAvailable = async (req, res, next) => {
   }
 };
 
-const joinUser = async (req, res, next) => {
+const joinUserOnChat = async (req, res, next) => {
   try {
     validateError(req);
 
@@ -67,8 +56,8 @@ const joinUser = async (req, res, next) => {
 const getUsersByChannel = async (req, res, next) => {
   try {
     const { params } = req;
-    const { alias } = params;
-    const data = await userService.findUsersByChannel(alias);
+    const { channelAlias } = params;
+    const data = await userService.findUsersByChannel(channelAlias);
 
     res.status(httpStatus.OK).json(data);
   } catch (e) {
@@ -76,13 +65,14 @@ const getUsersByChannel = async (req, res, next) => {
   }
 };
 
-const leftUser = async (req, res, next) => {
+const leftUserOnChat = async (req, res, next) => {
   try {
-    validateError(req);
+    console.log('aquiiii');
 
     const { params } = req;
     const { username } = params;
 
+    console.log(username);
     await userService.leftUser(username);
 
     res.status(httpStatus.OK).json({
@@ -93,4 +83,4 @@ const leftUser = async (req, res, next) => {
   }
 };
 
-export { getAll, getAvailable, joinUser, leftUser, getUsersByChannel };
+export { getAllUsers, getAvailable, joinUserOnChat, leftUserOnChat, getUsersByChannel };

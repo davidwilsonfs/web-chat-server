@@ -6,27 +6,16 @@ const registerBodyvalidator = [
     .withMessage('Message é um campo obrigatório.')
     .isString()
     .withMessage('Deve ser uma string.'),
-  body('channel')
+  body('aliasChannel')
     .exists()
-    .withMessage('channel é um campo obrigatório.')
+    .withMessage('aliasChannel é um campo obrigatório.')
     .isString()
-    .withMessage('channel ser uma string.'),
-  body('user')
+    .withMessage('aliasChannel ser uma string.'),
+  body('username')
     .exists()
-    .withMessage('user é um campo obrigatório.')
+    .withMessage('username é um campo obrigatório.')
     .isString()
-    .withMessage('user ser uma string.'),
+    .withMessage('username ser uma string.'),
 ];
 
-const validateQuery = [
-  query('limit')
-    .optional()
-    .isInt()
-    .withMessage('limit é um campo numérico.'),
-  query('page')
-    .optional()
-    .isInt()
-    .withMessage('page é um campo numérico.'),
-];
-
-export { registerBodyvalidator, validateQuery };
+export { registerBodyvalidator };

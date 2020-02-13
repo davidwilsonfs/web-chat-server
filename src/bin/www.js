@@ -1,28 +1,27 @@
 import http from 'http';
 import chalk from 'chalk';
 import ip from 'ip';
-// import { LISTEN, EACCES, EADDRINUSE, SERVER } from '../common';
 
 /**
  * Avalia o erro que foi gerado ao tentar levantar o servidor
  * @param {Error} error
  */
 function onError(error) {
-  // if (error.syscall !== LISTEN) {
-  //   throw error;
-  // }
-  // switch (error.code) {
-  //   case EACCES:
-  //     console.log(`${process.env.PORT} requires elevated privileges`, SERVER);
-  //     process.exit(1);
-  //     break;
-  //   case EADDRINUSE:
-  //     console.log(`${process.env.PORT} is already in use`, SERVER);
-  //     process.exit(1);
-  //     break;
-  //   default:
-  //     throw error;
-  // }
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+  switch (error.code) {
+    case 'EACCES':
+      console.log(`${process.env.PORT} requires elevated privileges`);
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.log(`${process.env.PORT} is already in use`);
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
 }
 
 /**

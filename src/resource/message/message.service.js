@@ -1,33 +1,37 @@
 // import httpStatus from 'http-status-codes';
+import httpStatus from 'http-status-codes';
 import * as repository from './message.repository';
+import * as constants from './message.constants';
 import { channelService } from '../channel';
 import { userService } from '../user';
 
-const getMessagesByChannel = async (channel, options) => {
-  try {
-    await channelService.findByAlias(channel);
+import { globalErrorHandler } from '../../core/exceptions';
 
-    return repository.getMessagesByChannel(channel, options);
+const getMessagesByChannel = async (channelAlias, createdAt) => {
+  try {
+    await channelService.findByAlias(channelAlias);
+
+    if (!parseInt(createdAt, 10)) {
+      return globalErrorHandler(
+        {
+          name: httpStatus.getStatusText(httpStatus.BAD_REQUEST),
+          message: constants.CREATEDAT_REQUIRED,
+        },
+        httpStatus.BAD_REQUEST
+      );
+    }
+
+    return repository.getMessagesByChannel(channelAlias, new Date(createdAt));
   } catch (e) {
     throw e;
   }
 };
 
-const getMessages = async (channel, createdAt) => {
+const getMessagesByUser = async username => {
   try {
-    await channelService.findByAlias(channel);
+    await userService.findByUsername(username);
 
-    return repository.getMessages(channel, createdAt);
-  } catch (e) {
-    throw e;
-  }
-};
-
-const getMessagesByUser = async (user, options) => {
-  try {
-    await userService.findByUsername(user);
-
-    return repository.getMessagesByUser(user, options);
+    return repository.getMessagesByUser(username);
   } catch (e) {
     throw e;
   }
@@ -35,10 +39,10 @@ const getMessagesByUser = async (user, options) => {
 
 const insertMessage = async data => {
   try {
-    const { channel, user, text } = data;
+    const { aliasChannel, username, text } = data;
 
-    const { _id: userId } = await userService.findByUsername(user);
-    const { _id: channelId } = await channelService.findByAlias(channel);
+    const { _id: userId } = await userService.findByUsername(username);
+    const { _id: channelId } = await channelService.findByAlias(aliasChannel);
 
     const newData = { user: userId, channel: channelId, text };
 
@@ -48,4 +52,4 @@ const insertMessage = async data => {
   }
 };
 
-export { getMessagesByChannel, getMessagesByUser, insertMessage, getMessages };
+export { getMessagesByChannel, getMessagesByUser, insertMessage };

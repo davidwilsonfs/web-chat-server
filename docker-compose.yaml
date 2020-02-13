@@ -1,0 +1,31 @@
+version: '3.5'
+
+services:
+
+  mongo:
+    image: mongo
+    networks:
+      - chat_network
+    environment:
+      - MONGO_INITDB_DATABASE=chat
+    ports:
+      - 27018:27017
+    volumes:
+      - chat_dbdata:/data/db
+
+  api:
+    build: 
+      context: .
+    networks:
+      - chat_network
+    ports:
+      - 3001:3001
+    depends_on:
+      - mongo
+  
+networks: 
+  chat_network:
+
+volumes:
+  chat_dbdata:
+

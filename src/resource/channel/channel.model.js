@@ -13,6 +13,7 @@ const ChannelSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  usersTyping: [String],
 });
 
 ChannelSchema.plugin(aggregatePaginate);

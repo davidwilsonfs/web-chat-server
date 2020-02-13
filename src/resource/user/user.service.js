@@ -5,15 +5,7 @@ import * as repository from './user.repository';
 import { channelService } from '../channel';
 import { globalErrorHandler } from '../../core/exceptions';
 
-const getAll = async options => {
-  try {
-    return repository.findAll(options);
-  } catch (e) {
-    throw e;
-  }
-};
-
-const findAll = async () => {
+const getAll = async () => {
   try {
     return repository.getAll();
   } catch (e) {
@@ -43,11 +35,12 @@ const joinUser = async user => {
       );
     }
 
-    const { _id: id } = await channelService.findByAlias('general');
+    const { CHANNEL_NAME_GENERAL } = process.env;
+
+    const { _id: id } = await channelService.findByAlias(CHANNEL_NAME_GENERAL);
 
     const userModified = Object.assign({ channel: id }, user);
 
-    console.log(userModified);
     await repository.joinUser(userModified);
 
     return userModified;
@@ -60,6 +53,7 @@ const leftUser = async username => {
   try {
     const isExisted = await repository.findByUsername(username);
 
+    console.log(username);
     if (_.isEmpty(isExisted)) {
       return globalErrorHandler(
         { name: httpStatus.getStatusText(httpStatus.NOT_FOUND), message: USER_NOT_FOUND },
@@ -94,11 +88,11 @@ const findByUsername = async username => {
 
 const updateUser = async data => {
   try {
-    const { username, room: channel } = data;
+    const { username, room: alias } = data;
 
     const { _id: userId } = await repository.findByUsername(username);
 
-    const { _id: channelId } = await channelService.findByAlias(channel);
+    const { _id: channelId } = await channelService.findByAlias(alias);
 
     const updateData = { dateInChannel: new Date(), channel: channelId };
     await repository.updateUser(userId, updateData);
@@ -107,24 +101,14 @@ const updateUser = async data => {
   }
 };
 
-const findUsersByChannel = async alias => {
+const findUsersByChannel = async channelAlias => {
   try {
-    console.log(alias);
-    await channelService.findByAlias(alias);
+    await channelService.findByAlias(channelAlias);
 
-    return repository.findUsersByChannel(alias);
+    return repository.findUsersByChannel(channelAlias);
   } catch (e) {
     throw e;
   }
 };
 
-export {
-  leftUser,
-  joinUser,
-  getAvailable,
-  getAll,
-  findAll,
-  findUsersByChannel,
-  updateUser,
-  findByUsername,
-};
+export { leftUser, joinUser, getAvailable, getAll, findUsersByChannel, updateUser, findByUsername };

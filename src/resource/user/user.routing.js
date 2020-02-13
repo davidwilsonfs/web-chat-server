@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as userController from './user.controller';
-import { registerBodyvalidator, validateQuery } from './user.validator';
+import { registerBodyvalidator } from './user.validator';
 import { authorized } from '../../core/security/auth-strategy.security';
 
 const userRouter = Router();
@@ -15,22 +15,11 @@ const userRouter = Router();
  *       - UserAuth: []
  *     tags:
  *       - Users
- *     parameters:
- *       - name: limit
- *         description: Limite da quantidade de documentos por pagina
- *         in: query
- *         required: false
- *         type: string
- *       - name: page
- *         description: Pagina dos documentos
- *         in: query
- *         required: false
- *         type: string
  *     responses:
  *       200:
  *         description: list of all
  */
-userRouter.get('/', validateQuery, authorized, userController.getAll);
+userRouter.get('/', authorized, userController.getAllUsers);
 
 /**
  * @swagger
@@ -59,7 +48,7 @@ userRouter.get('/available/:username', userController.getAvailable);
  * /users/join:
  *   post:
  *     summary: Insere o usuário no chat de conversas
- *     description: Insere um novo usuário na base de dados
+ *     description: Insere um novo usuário no chat de conversas geral
  *     tags:
  *       - Users
  *     parameters:
@@ -79,14 +68,14 @@ userRouter.get('/available/:username', userController.getAvailable);
  *       400:
  *         description: Bad Request
  */
-userRouter.post('/join', registerBodyvalidator, userController.joinUser);
+userRouter.post('/join', registerBodyvalidator, userController.joinUserOnChat);
 
 /**
  * @swagger
  * /users/left/{username}:
- *   post:
+ *   delete:
  *     summary: Remove o usuário do chat de conversas
- *     description: Rem,ove um  usuário da base de dados
+ *     description: Remove um usuário da base de dados
  *     security:
  *       - UserAuth: []
  *     tags:
@@ -105,21 +94,21 @@ userRouter.post('/join', registerBodyvalidator, userController.joinUser);
  *       404:
  *         description: Not Found
  */
-userRouter.post('/left/:username', authorized, userController.leftUser);
+userRouter.delete('/left/:username', authorized, userController.leftUserOnChat);
 
 /**
  * @swagger
- * /users/channel/{alias}:
+ * /users/channel/{channelAlias}:
  *   get:
  *     summary: Retorna os usuários do canal
- *     description: Retorna todos os usuários ativos no canal
+ *     description: Retorna todos os usuários ativos no canal pelo seu alias
  *     security:
  *       - UserAuth: []
  *     tags:
  *       - Users
  *     parameters:
- *       - name: alias
- *         description: Nome.
+ *       - name: channelAlias
+ *         description: Nome do canal.
  *         in: path
  *         required: true
  *         type: string
@@ -131,6 +120,6 @@ userRouter.post('/left/:username', authorized, userController.leftUser);
  *       404:
  *         description: Not Found
  */
-userRouter.get('/channel/:alias', authorized, userController.getUsersByChannel);
+userRouter.get('/channel/:channelAlias', authorized, userController.getUsersByChannel);
 
 export default userRouter;

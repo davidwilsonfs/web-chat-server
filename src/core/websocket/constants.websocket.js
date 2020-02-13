@@ -13,3 +13,6 @@ export const UPDATE_ROOMS_EVENTS = 'updateRooms';
 export const REFRESH_PAGE_EVENT = 'refreshPage';
 export const REFRESH_PAGE_UPDATE_EVENT = 'updateDataRefresh';
 export const NOTIFICATION_EVENT = 'notificationEvent';
+export const USER_TYPING_EVENT = 'userTyping';
+export const STOP_TYPING_EVENT = 'stopTyping';
+export const NOTIFY_TYPING_EVENT = 'notifyTypingEvent';

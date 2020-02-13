@@ -49,25 +49,6 @@ const remove = async alias => {
   }
 };
 
-const findChannel = async alias => {
-  try {
-    const isExisted = await repository.findByAlias(alias);
-
-    if (_.isEmpty(isExisted)) {
-      return globalErrorHandler(
-        { name: httpStatus.getStatusText(httpStatus.NOT_FOUND), message: CHANNEL_NOT_FOUND },
-        httpStatus.NOT_FOUND
-      );
-    }
-
-    const { _id: id } = isExisted;
-
-    return repository.remove(id);
-  } catch (e) {
-    throw e;
-  }
-};
-
 const findByAlias = async alias => {
   try {
     const isExisted = await repository.findByAlias(alias);
@@ -85,6 +66,16 @@ const findByAlias = async alias => {
   }
 };
 
+const getUsersTyping = async alias => {
+  try {
+    const { usersTyping } = await findByAlias(alias);
+
+    return usersTyping.reduce((prev, next) => `${prev},${next} is typing`, '').slice(1);
+  } catch (e) {
+    throw e;
+  }
+};
+
 const incrementUserAmount = async (alias, number) => {
   try {
     const { _id: id } = await findByAlias(alias);
@@ -95,4 +86,33 @@ const incrementUserAmount = async (alias, number) => {
   }
 };
 
-export { findAll, findChannel, register, remove, findByAlias, incrementUserAmount };
+const updateUsersTyping = async (alias, username) => {
+  try {
+    const { _id: id } = await findByAlias(alias);
+
+    return repository.updateUsersTyping(id, username);
+  } catch (e) {
+    throw e;
+  }
+};
+
+const updateUsersStopTyping = async (alias, username) => {
+  try {
+    const { _id: id } = await findByAlias(alias);
+
+    return repository.updateUsersStopTyping(id, username);
+  } catch (e) {
+    throw e;
+  }
+};
+
+export {
+  findAll,
+  register,
+  remove,
+  findByAlias,
+  updateUsersTyping,
+  updateUsersStopTyping,
+  incrementUserAmount,
+  getUsersTyping,
+};

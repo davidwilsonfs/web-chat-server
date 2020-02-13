@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as channelController from './channel.controller';
-import { registerBodyvalidator, validateQuery } from './channel.validator';
+import { registerBodyvalidator } from './channel.validator';
 import { authorized } from '../../core/security/auth-strategy.security';
 
 const channelRouter = Router();
@@ -14,29 +14,18 @@ const channelRouter = Router();
  *       - UserAuth: []
  *     tags:
  *       - Channels
- *     parameters:
- *       - name: limit
- *         description: Limite da quantidade de documentos por pagina
- *         in: query
- *         required: false
- *         type: string
- *       - name: page
- *         description: Pagina dos documentos
- *         in: query
- *         required: false
- *         type: string
  *     responses:
  *       200:
  *         description: list of all
  */
-channelRouter.get('/', authorized, validateQuery, channelController.getChannels);
+channelRouter.get('/', authorized, channelController.getChannels);
 
 /**
  * @swagger
  * /channels/{alias}:
  *   get:
  *     summary: Retorna o channel
- *     description: Rerota o channel da lista de canais
+ *     description: Retorna o canal pelo seu alias
  *     security:
  *       - UserAuth: []
  *     tags:
@@ -86,7 +75,7 @@ channelRouter.post('/', authorized, registerBodyvalidator, channelController.cre
  * /channels/{alias}:
  *   delete:
  *     summary: Remove o channel
- *     description: Remove o channel da lista de canais
+ *     description: Remove o channel da lista de canais pelo seu alias
  *     security:
  *       - UserAuth: []
  *     tags:

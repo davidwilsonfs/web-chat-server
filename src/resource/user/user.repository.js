@@ -1,25 +1,6 @@
 import omitDeep from 'omit-deep';
 import { User } from './user.model';
 
-const findAll = async options => {
-  try {
-    const aggregate = User.aggregate();
-
-    const { docs, totalPages, totalDocs, nextPage, prevPage } = await User.aggregatePaginate(
-      aggregate,
-      options
-    );
-
-    const cleanData = omitDeep(docs, ['__v']);
-    return {
-      data: cleanData,
-      metadata: { totalPages, totalDocs, nextPage, prevPage },
-    };
-  } catch (e) {
-    throw e;
-  }
-};
-
 const getAll = async () => {
   try {
     return User.find({});
@@ -63,7 +44,7 @@ const updateUser = async (id, data) => {
   }
 };
 
-const findUsersByChannel = async alias => {
+const findUsersByChannel = async channelAlias => {
   try {
     const data = await User.aggregate()
       .lookup({
@@ -73,12 +54,11 @@ const findUsersByChannel = async alias => {
         as: 'channel',
       })
       .unwind('channel')
-      .match({ 'channel.alias': alias });
+      .match({ 'channel.alias': channelAlias });
 
-    const cleanData = omitDeep(data, ['__v', '_id']);
-    return cleanData;
+    return omitDeep(data, ['__v', '_id']);
   } catch (e) {
     throw e;
   }
 };
-export { findByUsername, leftUser, joinUser, findAll, getAll, updateUser, findUsersByChannel };
+export { findByUsername, leftUser, joinUser, getAll, updateUser, findUsersByChannel };

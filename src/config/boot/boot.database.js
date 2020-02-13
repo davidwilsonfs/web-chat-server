@@ -28,7 +28,7 @@ export default () => {
     keepAlive: true,
   };
 
-  const dbURI = process.env.MDB_URL;
+  const dbURI = `mongodb://${process.env.MDB_HOST}:${process.env.MDB_PORT}/${process.env.MDB_NAME}`;
   log('DB', `mongodb uri ${dbURI}`);
 
   mongoose.connect(dbURI, opts);

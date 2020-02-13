@@ -37,6 +37,14 @@ export default class SocketEvents {
       this.refreshPage(data);
     });
 
+    socket.on(constants.USER_TYPING_EVENT, () => {
+      this.startTyping();
+    });
+
+    socket.on(constants.STOP_TYPING_EVENT, () => {
+      this.stopTyping();
+    });
+
     socket.on(constants.DISCONNECT_EVENT, () => {
       console.log(`${socket.username} should be remove`);
     });
@@ -48,14 +56,27 @@ export default class SocketEvents {
     const { username } = data;
 
     socket.username = username;
-    const user = await userService.findByUsername(username);
 
-    socket.room = user.channel.alias;
+    const { channel, urlImage } = await userService.findByUsername(username);
+
+    socket.room = channel.alias;
+
     await channelService.incrementUserAmount(socket.room, 1);
 
     socket.join(socket.room);
     const users = await userService.findAll();
+
     io.sockets.in(socket.room).emit(constants.USER_JOINED_EVENT, users);
+
+    const notifyData = {
+      text: `${socket.username} connected to ${socket.room}`,
+      icon: urlImage,
+      username: socket.username,
+      room: socket.room,
+    };
+
+    socket.broadcast.to(socket.room).emit(constants.NOTIFICATION_EVENT, notifyData);
+
     await this.updateRooms();
   }
 
@@ -66,14 +87,19 @@ export default class SocketEvents {
     socket.username = username;
 
     const user = await userService.findByUsername(username);
+
     const { channel } = user;
 
     socket.room = channel.alias;
+
     socket.join(socket.room);
     socket.emit(constants.REFRESH_PAGE_UPDATE_EVENT, { channel: channel.alias, user });
 
     let users;
-    if (socket.room === 'general') {
+
+    const { CHANNEL_NAME_GENERAL } = process.env;
+
+    if (socket.room === CHANNEL_NAME_GENERAL) {
       users = await userService.findAll();
       await this.updateRooms();
     } else {
@@ -88,8 +114,8 @@ export default class SocketEvents {
 
     const data = {
       text: message.text,
-      channel: message.channel.name,
-      user: message.user.username,
+      channelAlias: message.channel.name,
+      username: message.user.username,
     };
 
     await messageService.insertMessage(data);
@@ -104,15 +130,33 @@ export default class SocketEvents {
     io.sockets.in(socket.room).emit(constants.UPDATE_ROOMS_EVENTS, rooms);
   }
 
-  // joinRoom(room) {
-  //   const { socket } = this;
+  async startTyping() {
+    const { socket, io } = this;
 
-  //   socket.room = room;
-  //   socket.join(room);
-  //   socket.broadcast
-  //     .to(room)
-  //     .emit(constants.UPDATE_CHAT_EVENT, `${socket.username} have connected to ${room}`);
-  // }
+    const { username, room } = socket;
+
+    await userService.findByUsername(username);
+
+    await channelService.updateUsersTyping(room, username);
+
+    const usersTyping = await channelService.getUsersTyping(room);
+
+    io.sockets.in(socket.room).emit(constants.NOTIFY_TYPING_EVENT, usersTyping);
+  }
+
+  async stopTyping() {
+    const { socket, io } = this;
+
+    const { username, room } = socket;
+
+    await userService.findByUsername(username);
+
+    await channelService.updateUsersStopTyping(room, username);
+
+    const usersTyping = await channelService.getUsersTyping(room);
+
+    io.sockets.in(socket.room).emit(constants.NOTIFY_TYPING_EVENT, usersTyping);
+  }
 
   async switchRoom(newRoom) {
     const { socket, io } = this;
@@ -121,13 +165,21 @@ export default class SocketEvents {
       await channelService.incrementUserAmount(socket.room, -1);
       await channelService.incrementUserAmount(newRoom, 1);
 
-      // socket.broadcast
-      //   .to(socket.room)
-      //   .emit(constants.NOTIFICATION_EVENT, `${socket.username} has list this room`);
+      const user = await userService.findByUsername(socket.username);
 
-      if (socket.room === 'general') {
+      let notifyData = {
+        text: `${socket.username} left this room`,
+        icon: user.urlImage,
+        username: socket.username,
+        room: socket.room,
+      };
+
+      socket.broadcast.to(socket.room).emit(constants.NOTIFICATION_EVENT, notifyData);
+
+      const { CHANNEL_NAME_GENERAL } = process.env;
+
+      if (socket.room === CHANNEL_NAME_GENERAL) {
         // por eenquanto
-
         await this.updateRooms();
       }
 
@@ -138,13 +190,18 @@ export default class SocketEvents {
       const { room, username } = socket;
       await userService.updateUser({ username, room });
 
-      // socket.broadcast
-      //   .to(newRoom)
-      //   .emit(constants.NOTIFICATION_EVENT, `${socket.username}  you have connected to ${newRoom}`);
+      notifyData = {
+        text: `${socket.username} connected to ${newRoom}`,
+        icon: user.urlImage,
+        username: socket.username,
+        room: socket.room,
+      };
+
+      socket.broadcast.to(newRoom).emit(constants.NOTIFICATION_EVENT, notifyData);
 
       let users;
 
-      if (newRoom === 'general') {
+      if (newRoom === CHANNEL_NAME_GENERAL) {
         users = await userService.findAll();
         await this.updateRooms();
       } else {
