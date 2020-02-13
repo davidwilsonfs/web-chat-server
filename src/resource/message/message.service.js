@@ -1,37 +1,15 @@
 // import httpStatus from 'http-status-codes';
-import httpStatus from 'http-status-codes';
 import * as repository from './message.repository';
-import * as constants from './message.constants';
 import { channelService } from '../channel';
 import { userService } from '../user';
 
-import { globalErrorHandler } from '../../core/exceptions';
-
-const getMessagesByChannel = async (channelAlias, createdAt) => {
-  try {
-    await channelService.findByAlias(channelAlias);
-
-    if (!parseInt(createdAt, 10)) {
-      return globalErrorHandler(
-        {
-          name: httpStatus.getStatusText(httpStatus.BAD_REQUEST),
-          message: constants.CREATEDAT_REQUIRED,
-        },
-        httpStatus.BAD_REQUEST
-      );
-    }
-
-    return repository.getMessagesByChannel(channelAlias, new Date(createdAt));
-  } catch (e) {
-    throw e;
-  }
-};
-
 const getMessagesByUser = async username => {
   try {
-    await userService.findByUsername(username);
+    const { dateInChannel, channel } = await userService.findByUsername(username);
 
-    return repository.getMessagesByUser(username);
+    const { alias: aliasChannel } = channel;
+
+    return repository.getMessagesFromTimeEntering(aliasChannel, dateInChannel);
   } catch (e) {
     throw e;
   }
@@ -52,4 +30,4 @@ const insertMessage = async data => {
   }
 };
 
-export { getMessagesByChannel, getMessagesByUser, insertMessage };
+export { getMessagesByUser, insertMessage };

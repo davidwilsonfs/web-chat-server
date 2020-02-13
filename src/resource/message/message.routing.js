@@ -7,37 +7,10 @@ const messageRouter = Router();
 
 /**
  * @swagger
- * /messages/channel/{aliasChannel}:
- *   get:
- *     summary: Retorna todos as messagens de um canal
- *     description: Retorna todas as menssagens a patir de uma data de criação
- *     security:
- *       - UserAuth: []
- *     tags:
- *       - Messages
- *     parameters:
- *       - name: aliasChannel
- *         description: Nome do canal
- *         in: path
- *         required: true
- *         type: string
- *       - name: createdAt
- *         description: Data range
- *         in: query
- *         required: true
- *         type: string
- *     responses:
- *       200:
- *         description: list of all
- */
-messageRouter.get('/channel/:aliasChannel', authorized, messageController.getMessagesByChannel);
-
-/**
- * @swagger
  * /messages/user/{username}:
  *   get:
- *     summary: Retorna todos as messagens de um usuário
- *     description: Retorna as mesagens de usuário pelo seu username
+ *     summary: Retorna todos as messagens do usuário em um canal
+ *     description: Retorna todas as menssagens do canal em que o usuário está inserido desde o seu tempo de entrada nele
  *     security:
  *       - UserAuth: []
  *     tags:

@@ -12,6 +12,10 @@ const UserSchema = new mongoose.Schema({
   urlImage: {
     type: String,
   },
+  disconnect: {
+    type: Boolean,
+    default: false,
+  },
   dateInChannel: {
     type: Date,
     default: Date.now,
@@ -22,7 +26,21 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
+async function postRemove(user) {
+  try {
+    const { channel: channelId } = user;
+
+    await user.model('Channel').findOneAndUpdate({ _id: channelId }, { $inc: { amountUsers: -1 } });
+
+    return user;
+  } catch (err) {
+    return err;
+  }
+}
+
 UserSchema.plugin(aggregatePaginate);
+UserSchema.post('remove', postRemove);
+
 const User = mongoose.model('User', UserSchema);
 
 export { User };

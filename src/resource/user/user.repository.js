@@ -3,7 +3,7 @@ import { User } from './user.model';
 
 const getAll = async () => {
   try {
-    return User.find({});
+    return User.find({}).populate('channel');
   } catch (e) {
     throw e;
   }
@@ -30,7 +30,8 @@ const joinUser = async data => {
 
 const leftUser = async id => {
   try {
-    return User.findByIdAndDelete(id);
+    const user = await User.findById({ _id: id });
+    return await user.remove();
   } catch (e) {
     throw e;
   }

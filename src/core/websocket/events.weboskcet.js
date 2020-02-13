@@ -45,9 +45,62 @@ export default class SocketEvents {
       this.stopTyping();
     });
 
-    socket.on(constants.DISCONNECT_EVENT, () => {
-      console.log(`${socket.username} should be remove`);
+    socket.on(constants.LEFT_CHAT_EVENT, () => {
+      this.leftChat();
     });
+
+    socket.on(constants.DISCONNECT_EVENT, () => {
+      this.disconnect();
+    });
+  }
+
+  notificationEvent(text, username, room, icon) {
+    const { socket } = this;
+
+    const notifyData = { text, icon, username, room };
+
+    socket.broadcast.to(room).emit(constants.NOTIFICATION_EVENT, notifyData);
+  }
+
+  async getUsersByChannel() {
+    const { socket } = this;
+    const { room } = socket;
+
+    const { CHANNEL_NAME_GENERAL } = process.env;
+
+    if (room === CHANNEL_NAME_GENERAL) {
+      await this.updateRooms();
+      return userService.getAll();
+    }
+
+    return userService.findUsersByChannel(room);
+  }
+
+  async disconnect() {
+    const { socket } = this;
+
+    const { username } = socket;
+
+    if (username) {
+      await userService.updateConnection({ username, disconnect: true });
+
+      socket.disconnect = true;
+
+      setTimeout(() => {
+        this.checkDisconnect();
+      }, process.env.TIME_DISCONNECT_WEBSOCKET);
+    }
+  }
+
+  async checkDisconnect() {
+    const { socket } = this;
+    const { username } = socket;
+
+    const { disconnect } = await userService.findByUsername(username);
+
+    if (disconnect) {
+      this.leftChat();
+    }
   }
 
   async joinUser(data) {
@@ -61,23 +114,38 @@ export default class SocketEvents {
 
     socket.room = channel.alias;
 
-    await channelService.incrementUserAmount(socket.room, 1);
+    const { room } = socket;
 
-    socket.join(socket.room);
-    const users = await userService.findAll();
+    await channelService.incrementUserAmount(room, 1);
 
-    io.sockets.in(socket.room).emit(constants.USER_JOINED_EVENT, users);
+    socket.join(room);
+    const users = await userService.getAll();
 
-    const notifyData = {
-      text: `${socket.username} connected to ${socket.room}`,
-      icon: urlImage,
-      username: socket.username,
-      room: socket.room,
-    };
+    io.sockets.in(room).emit(constants.USER_JOINED_EVENT, users);
 
-    socket.broadcast.to(socket.room).emit(constants.NOTIFICATION_EVENT, notifyData);
+    this.notificationEvent(`${username} connected to ${room}`, username, room, urlImage);
 
     await this.updateRooms();
+  }
+
+  async leftChat() {
+    const { socket, io } = this;
+    const { username, room } = socket;
+
+    const { urlImage } = await userService.findByUsername(username);
+
+    await userService.leftUser(username);
+
+    this.notificationEvent(`${username} left this room ${room}`, username, room, urlImage);
+
+    const rooms = await channelService.findAll();
+    const users = await userService.getAll();
+
+    io.sockets.emit(constants.UPDATE_ROOMS_EVENTS, rooms);
+
+    io.sockets.emit(constants.USER_JOINED_EVENT, users);
+
+    this.socket.leave(room);
   }
 
   async refreshPage(data) {
@@ -86,41 +154,39 @@ export default class SocketEvents {
 
     socket.username = username;
 
+    await userService.updateConnection({ username, disconnect: false });
+
     const user = await userService.findByUsername(username);
 
     const { channel } = user;
 
     socket.room = channel.alias;
 
-    socket.join(socket.room);
-    socket.emit(constants.REFRESH_PAGE_UPDATE_EVENT, { channel: channel.alias, user });
+    const { room } = socket;
 
-    let users;
+    socket.join(room);
 
-    const { CHANNEL_NAME_GENERAL } = process.env;
+    socket.emit(constants.REFRESH_PAGE_UPDATE_EVENT, {
+      channel: room,
+      user,
+    });
+    const users = await this.getUsersByChannel();
 
-    if (socket.room === CHANNEL_NAME_GENERAL) {
-      users = await userService.findAll();
-      await this.updateRooms();
-    } else {
-      users = await userService.findUsersByChannel(socket.room);
-    }
-
-    io.sockets.in(socket.room).emit(constants.USER_JOINED_EVENT, users);
+    io.sockets.in(room).emit(constants.USER_JOINED_EVENT, users);
   }
 
   async sendMessage(message) {
     const { io, socket } = this;
+    const { text } = message;
+    const { room, username } = socket;
 
-    const data = {
-      text: message.text,
-      channelAlias: message.channel.name,
-      username: message.user.username,
-    };
+    await messageService.insertMessage({
+      text,
+      aliasChannel: room,
+      username,
+    });
 
-    await messageService.insertMessage(data);
-
-    io.sockets.in(socket.room).emit(constants.CHAT_MESSAGE_EVENT);
+    io.sockets.in(room).emit(constants.CHAT_MESSAGE_EVENT);
   }
 
   async updateRooms() {
@@ -160,55 +226,39 @@ export default class SocketEvents {
 
   async switchRoom(newRoom) {
     const { socket, io } = this;
+    const { room, username } = socket;
+    const { CHANNEL_NAME_GENERAL } = process.env;
 
-    if (newRoom !== socket.room) {
-      await channelService.incrementUserAmount(socket.room, -1);
+    if (newRoom !== room) {
+      await channelService.incrementUserAmount(room, -1);
       await channelService.incrementUserAmount(newRoom, 1);
 
-      const user = await userService.findByUsername(socket.username);
+      const { urlImage } = await userService.findByUsername(socket.username);
 
-      let notifyData = {
-        text: `${socket.username} left this room`,
-        icon: user.urlImage,
-        username: socket.username,
-        room: socket.room,
-      };
+      this.notificationEvent(`${username} left this room`, username, room, urlImage);
 
-      socket.broadcast.to(socket.room).emit(constants.NOTIFICATION_EVENT, notifyData);
+      console.log('Primeira parte');
 
-      const { CHANNEL_NAME_GENERAL } = process.env;
-
-      if (socket.room === CHANNEL_NAME_GENERAL) {
-        // por eenquanto
+      if (room === CHANNEL_NAME_GENERAL) {
         await this.updateRooms();
       }
 
-      socket.leave(socket.room);
+      socket.leave(room);
       socket.room = newRoom;
       socket.join(newRoom);
 
-      const { room, username } = socket;
-      await userService.updateUser({ username, room });
+      await userService.updateUser({ username, newRoom });
 
-      notifyData = {
-        text: `${socket.username} connected to ${newRoom}`,
-        icon: user.urlImage,
-        username: socket.username,
-        room: socket.room,
-      };
+      this.notificationEvent(
+        `${socket.username} connected to ${newRoom}`,
+        username,
+        newRoom,
+        urlImage
+      );
 
-      socket.broadcast.to(newRoom).emit(constants.NOTIFICATION_EVENT, notifyData);
+      const users = await this.getUsersByChannel();
 
-      let users;
-
-      if (newRoom === CHANNEL_NAME_GENERAL) {
-        users = await userService.findAll();
-        await this.updateRooms();
-      } else {
-        users = await userService.findUsersByChannel(socket.room);
-      }
-
-      io.sockets.in(socket.room).emit(constants.USER_JOINED_EVENT, users);
+      io.sockets.in(newRoom).emit(constants.USER_JOINED_EVENT, users);
     }
   }
 }

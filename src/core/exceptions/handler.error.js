@@ -14,7 +14,7 @@ const errorHandler = (err, req, res, next) => {
   const errorType = err.name ? err.name : 'Exception';
   const message = err.message || err || httpStatus.getStatusText(httpStatus.INTERNAL_SERVER_ERROR);
 
-  res.status(status).json({ errors: [{ errorType, message }] });
+  res.status(status).json({ errorType, message });
 };
 
 const configErrorHandler = app => {

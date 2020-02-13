@@ -1,10 +1,10 @@
 import omitDeep from 'omit-deep';
 import { Message } from './message.model';
 
-const getMessagesByChannel = async (channelAlias, createdAt) => {
+const getMessagesFromTimeEntering = async (aliasChannel, dateInChannel) => {
   try {
     const data = await Message.aggregate()
-      .match({ created_at: { $gte: createdAt } })
+      .match({ created_at: { $gte: dateInChannel } })
       .lookup({
         from: 'channels',
         localField: 'channel',
@@ -12,7 +12,7 @@ const getMessagesByChannel = async (channelAlias, createdAt) => {
         as: 'channel',
       })
       .unwind('channel')
-      .match({ 'channel.alias': channelAlias })
+      .match({ 'channel.alias': aliasChannel })
       .sort({ created_at: 1 })
       .lookup({
         from: 'users',
@@ -21,32 +21,6 @@ const getMessagesByChannel = async (channelAlias, createdAt) => {
         as: 'user',
       })
       .unwind('user');
-
-    return omitDeep(data, ['_id', '__v']);
-  } catch (e) {
-    throw e;
-  }
-};
-
-const getMessagesByUser = async username => {
-  try {
-    const data = await Message.aggregate()
-      .lookup({
-        from: 'users',
-        localField: 'user',
-        foreignField: '_id',
-        as: 'user',
-      })
-      .unwind('user')
-      .match({ 'user.username': username })
-      .sort({ created_at: -1 })
-      .lookup({
-        from: 'channels',
-        localField: 'channel',
-        foreignField: '_id',
-        as: 'channel',
-      })
-      .unwind('channel');
 
     return omitDeep(data, ['_id', '__v']);
   } catch (e) {
@@ -63,4 +37,4 @@ const insert = async data => {
   }
 };
 
-export { getMessagesByChannel, getMessagesByUser, insert };
+export { getMessagesFromTimeEntering, insert };

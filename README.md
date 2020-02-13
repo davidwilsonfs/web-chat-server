@@ -1,40 +1,48 @@
 # Websocket API.
 
-## APIs
+Api para fins de avaliação tecnica, que tem como principal objetivo fornecer um serviço em websocket para controle de um webchat WEB e uma API REST para controle de acesso dos usuários a WEBCHAT.
 
-- Cria Usuário no Cognito
-- Deletar Usuário no Cognito
-  ...
+# Variaveis de Ambiente .env
 
-## Envs
+Variaveis de ambiente que devem ser declaradas no arquivo `.env`
 
-Criar um arquivo `.env` e inserir variáveis de ambiente a esse arquivo da seguinte forma:
+| Envs                           |                                          Descrição | Exemplos                |
+| ------------------------------ | -------------------------------------------------: | ----------------------- |
+| HOST                           |                                                 IP | localhost               |
+| PORT                           |           porta em que o servidor ficará escutando | 8080                    |
+| MDB_HOST                       |                               IP do banco de dados | localhost               |
+| MDB_NAME                       |                             Nome do banco de dados | chat                    |
+| MDB_PORT                       |                            Porta do banco de dados | 27017                   | 
+| PROJECT                        |                                    Nome do Projeto | CHAT                    |
+| SWAGGER_ROUTE                  |   Rota base para acessar a documentação do swagger | /api-docs               |
+| SWAGGER_URL_STATS              |   Rota base para acessar os status da rota         | http://localhost:8986/swagger-stats/ui               |
+| DEBUG                          |                     Chave de pesquisa para debugar | CHAT:\*                 |
+| LOGS_PATH                      |             diretório em que os logs serão gerados | /logs                   |
+| LOGS_FILENAME                  |                arquivo onde os logs serão escritos | /app.log                |
+| JWT_PRIVATE_KEY                | Chave privada utilizada na autenticação do sistema | secr3t                  |
+| JWT_EXPIRES_IN                 |          Tempo de vida do token  (TTL)        | 3600                |
+| API_BASE_PATH                 |                  Rota base da API| /api               |
+| API_URL                       |                  URL da API         | localhost:8986                |
+
+
+## Install
+Instalar npm e bower packages;
 
 ```
-AUTH_DOMAIN=<DOMINIO DO SERVIÇO>
-COGNITO_USER_EMAIL=<EMAIL DO USUARIO COGNITO PRE CADASTRADO>
-COGNITO_PASSWORD=<PASSWORD DO USUARIO COGNITO PRE CADASTRADO>
-COGNITO_PROPOSED_PASSWORD=<PASSWORD PROPOSTO NA ALTERAÇÃO DE PASSWORD DO USUARIO COGNITO PRE CADASTRADO>
-COGNITO_ID=<ID DO USUARIO COGNITO PRE CADASTRADO>
+npm install
+npm install -g bower
+bower install
 ```
 
-# Test
+## Development
+Todos os scripts rodam com  `npm run [script]`, por exemplo: `npm run dev`.
 
-Para realizar os testes é necessãrio seguir os seguintes passos:
+`build`        - gera o minified build na pasta `dist`  
+`test`         - Executa todos os testes  
+`start`        - Realiza o build e inicializa a aplicação a partir do dist 
 
-1. Instalar as dependencias do projeto via: `npm install`
-2. Implantar a aplicação na cloud: `npm run deploy-test`
-3. criar o arquivo de `.env`
-4. Executar os testes via: `npm test`
-
-# Tools
-
-Algumas ferramentas uteis durante testes manuais:
-
-- Servidor de email (Temp Mail): https://temp-mail.org/pt/
-- Postman: https://www.getpostman.com/
-- ESLINT: https://www.npmjs.com/package/eslint
+Os scripts de execução estão todos no `package.json`.
 
 # Documentation
 
-Documentação pública dos serviços da Hazel: https://documenter.getpostman.com/view/1147519/SVtR2Vhh
+Para acessar a documentação do swagger, acessar `http://localhost:<PORT>`. Para acessar o swagger status, para obter informações sobre a "saúde" da sua aplicação REST, acessar `http://localhost:<PORT>/<SWAGGER_URL_STATS>`

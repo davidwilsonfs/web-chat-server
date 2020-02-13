@@ -16,3 +16,4 @@ export const NOTIFICATION_EVENT = 'notificationEvent';
 export const USER_TYPING_EVENT = 'userTyping';
 export const STOP_TYPING_EVENT = 'stopTyping';
 export const NOTIFY_TYPING_EVENT = 'notifyTypingEvent';
+export const LEFT_CHAT_EVENT = 'userLeft';

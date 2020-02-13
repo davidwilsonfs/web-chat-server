@@ -3,20 +3,6 @@ import * as messageService from './message.service';
 import * as constants from './message.constants';
 import { validateError } from '../../core/exceptions';
 
-const getMessagesByChannel = async (req, res, next) => {
-  try {
-    const { params, query } = req;
-    const { aliasChannel } = params;
-    const { createdAt } = query;
-
-    const data = await messageService.getMessagesByChannel(aliasChannel, createdAt);
-
-    res.status(httpStatus.OK).json(data);
-  } catch (e) {
-    next(e);
-  }
-};
-
 const getMessagesByUser = async (req, res, next) => {
   try {
     const { params } = req;
@@ -44,4 +30,4 @@ const insertMessage = async (req, res, next) => {
   }
 };
 
-export { getMessagesByChannel, getMessagesByUser, insertMessage };
+export { getMessagesByUser, insertMessage };

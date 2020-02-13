@@ -53,7 +53,6 @@ const leftUser = async username => {
   try {
     const isExisted = await repository.findByUsername(username);
 
-    console.log(username);
     if (_.isEmpty(isExisted)) {
       return globalErrorHandler(
         { name: httpStatus.getStatusText(httpStatus.NOT_FOUND), message: USER_NOT_FOUND },
@@ -88,14 +87,26 @@ const findByUsername = async username => {
 
 const updateUser = async data => {
   try {
-    const { username, room: alias } = data;
+    const { username, newRoom: alias } = data;
 
-    const { _id: userId } = await repository.findByUsername(username);
+    const { _id: userId } = await findByUsername(username);
 
     const { _id: channelId } = await channelService.findByAlias(alias);
 
     const updateData = { dateInChannel: new Date(), channel: channelId };
     await repository.updateUser(userId, updateData);
+  } catch (e) {
+    throw e;
+  }
+};
+
+const updateConnection = async data => {
+  try {
+    const { username } = data;
+
+    const { _id: userId } = await findByUsername(username);
+
+    await repository.updateUser(userId, data);
   } catch (e) {
     throw e;
   }
@@ -111,4 +122,13 @@ const findUsersByChannel = async channelAlias => {
   }
 };
 
-export { leftUser, joinUser, getAvailable, getAll, findUsersByChannel, updateUser, findByUsername };
+export {
+  leftUser,
+  joinUser,
+  getAvailable,
+  getAll,
+  updateConnection,
+  findUsersByChannel,
+  updateUser,
+  findByUsername,
+};

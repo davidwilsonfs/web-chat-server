@@ -67,12 +67,9 @@ const getUsersByChannel = async (req, res, next) => {
 
 const leftUserOnChat = async (req, res, next) => {
   try {
-    console.log('aquiiii');
-
     const { params } = req;
     const { username } = params;
 
-    console.log(username);
     await userService.leftUser(username);
 
     res.status(httpStatus.OK).json({
