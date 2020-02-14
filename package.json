@@ -45,6 +45,7 @@
     "omit-deep": "^0.3.0",
     "prettyjson": "^1.2.1",
     "socket.io": "^2.3.0",
+    "socketio-jwt": "^4.5.0",
     "supertest": "^4.0.2",
     "swagger-jsdoc": "^3.5.0",
     "swagger-stats": "^0.95.15",

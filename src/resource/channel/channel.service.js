@@ -70,7 +70,7 @@ const getUsersTyping = async alias => {
   try {
     const { usersTyping } = await findByAlias(alias);
 
-    return usersTyping.reduce((prev, next) => `${prev},${next} is typing`, '').slice(1);
+    return usersTyping;
   } catch (e) {
     throw e;
   }

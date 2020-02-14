@@ -1,6 +1,6 @@
 # Websocket API.
 
-Api para fins de avaliação tecnica, que tem como principal objetivo fornecer um serviço em websocket para controle de um webchat WEB e uma API REST para controle de acesso dos usuários a WEBCHAT.
+Api para fins de avaliação tecnica, que tem como principal objetivo fornecer um Websocket API e uma API REST para controle de um webchat WEB. Foi utilizado NodeJs em conjunto com MongoDB.
 
 # Variaveis de Ambiente .env
 
@@ -25,24 +25,33 @@ Variaveis de ambiente que devem ser declaradas no arquivo `.env`
 | API_URL                       |                  URL da API         | localhost:8986                |
 
 
-## Install
-Instalar npm e bower packages;
+## Instalação
+Instalar npm packages;
 
 ```
 npm install
-npm install -g bower
-bower install
 ```
 
-## Development
+
+## Scripts do sistema
 Todos os scripts rodam com  `npm run [script]`, por exemplo: `npm run dev`.
 
 `build`        - gera o minified build na pasta `dist`  
+`dev`          - Roda a aplicação em modo de desenvolvimento  
 `test`         - Executa todos os testes  
-`start`        - Realiza o build e inicializa a aplicação a partir do dist 
+`start`        - Realiza o build e inicializa a aplicação a partir do dist
 
-Os scripts de execução estão todos no `package.json`.
 
-# Documentation
+Os scripts de execução estão todos no `package.json`. Para a aplicação se conectar ao banco de dados, é necessário a instalação do MongoDB. [LINK](https://www.mongodb.com/cloud/atlas/lp/general/try?utm_source=google&utm_campaign=gs_americas_brazil_search_brand_atlas_desktop&utm_term=mongodb%20download&utm_medium=cpc_paid_search&utm_ad=e&gclid=CjwKCAiAhJTyBRAvEiwAln2qB96ILb5SO8IGse1GFIhCkW7vknF-r6kDAjXcDvgxlw43sECKsXgC0BoCWeAQAvD_BwE). 
+
+
+## Executando dentro do container DOCKER
+
+Para executar a aplicação dentro de um container é necessário executar os seguintes comandos:
+
+`docker-compose build`        - gera a imagem da API a partir do `Dockerfile`  
+`docker-compose up -d`          - Orquestra os containers da API e do MongoDB e levanta a aplicação
+   
+# Documentation da API
 
 Para acessar a documentação do swagger, acessar `http://localhost:<PORT>`. Para acessar o swagger status, para obter informações sobre a "saúde" da sua aplicação REST, acessar `http://localhost:<PORT>/<SWAGGER_URL_STATS>`

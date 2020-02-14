@@ -4,5 +4,4 @@
 /dist
 package-lock.json
 *.log
-*.env
-undefined
+# *.env

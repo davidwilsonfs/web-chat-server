@@ -20,7 +20,10 @@ const getMessagesFromTimeEntering = async (aliasChannel, dateInChannel) => {
         foreignField: '_id',
         as: 'user',
       })
-      .unwind('user');
+      .unwind({
+        path: '$user',
+        preserveNullAndEmptyArrays: true,
+      });
 
     return omitDeep(data, ['_id', '__v']);
   } catch (e) {

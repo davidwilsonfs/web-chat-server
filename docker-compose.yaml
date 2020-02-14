@@ -19,7 +19,7 @@ services:
     networks:
       - chat_network
     ports:
-      - 3001:3001
+      - 8986:8986
     depends_on:
       - mongo
   
